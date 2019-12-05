@@ -111,10 +111,15 @@ wip <- fread(here("data", "WB-WiP.csv"),
              check.names = TRUE)
 ```
 
-# Continue from here...
-
-
-
+```{r}
+WP <- melt(wip,
+           id.vars = c("Country", "Code"),
+           measure = patterns("~X"),
+           variable.name = "YearC",
+           value.name = c("pctWiP"),
+           na.rm = TRUE)
+WP
+```
 
 
 
