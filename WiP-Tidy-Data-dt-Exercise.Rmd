@@ -111,10 +111,26 @@ wip <- fread(here("data", "WB-WiP.csv"),
              check.names = TRUE)
 ```
 
+```{r Check}
+wip[, .N, by=.(V65)]
+
+```
+
+```{r RemovingColumns}
+wip[, c("Indicator.Name", "Indicator.Code",
+        "V65") :=NULL]
+setnames(wip, c("Country.Name", "Country.Code"),
+              c("Country", "Code"))
+head(names(wip))
+tail(names(wip))
+
+```
+
+
 ```{r Reshape}
 WP <- melt(wip,
            id.vars = c("Country", "Code"),
-           measure = patterns("~X"),
+           measure = patterns("X"),
            variable.name = "YearC",
            value.name = c("pctWiP"),
            na.rm = TRUE)
@@ -122,7 +138,7 @@ WP
 ```
 
 ```{r FinalTweaksToWP}
-WP[, `:=`(Years=as.numeric(gsub("[~[:digit:].]",
+WP[, `:=`(Year=as.numeric(gsub("[^[:digit:].]",
                                 "", YearC)),
           Ratio = (100-pctWiP)/pctWiP)][
             , YearC:=NULL]
@@ -132,7 +148,36 @@ WP
 ```
 
 
-zsdfsdfs
+```{r TimeTrendsInItaly}
+WP[Country %in% "Italy"]
+
+```
+
+```{r TimeTrendsInItalyPlot}
+library(ggplot2)
+library(magrittr)
+WP[Country %in% "Italy"] %>%
+ggplot(aes(Year, pctWiP)) +
+  geom_line() + geom_point() +
+  scale_y_continuous(limits=c(0, 50)) +
+  ylab("% Women in Parliament")
+
+```
+
+```{r ItalyvsOtherEUCountries}
+WP[Country %in% c("Italy", "Portugal", "Spain",
+            "Greece", "Germany", "France",
+            "Hungary", "European Union")] %>%
+  ggplot(aes(Year, pctWiP, colour=Country)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=seq(1990, 2020, 5)) +
+  scale_y_continuous(limits=c(0,50),
+                     breaks=seq(0, 50, by=10)) +
+  ggtitle("Women in Parliament: EU Countries") +
+  ylab("% Women in Parliament")
+
+```
 
 ```{r imageEnd, echo=FALSE, out.width="60%"}
 knitr::include_graphics("images/Women_in_Parliament_rect.svg")
